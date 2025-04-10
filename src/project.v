@@ -18,7 +18,14 @@ module tt_um_hrv (
 
   // All output pins must be assigned. If not used, assign to 0.
  // assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-     module tt_um_rmssd (
+  assign uio_out = 0;
+  assign uio_oe  = 0;
+
+  // List all unused inputs to prevent warnings
+  wire _unused = &{clk,1'b0};
+
+endmodule
+ module tt_um_rmssd (
     input wire clk, // Clock input
     input wire rst_n, // Active-low reset
     input wire [7:0] rr_in, // RR interval input (8-bit)
@@ -98,15 +105,5 @@ module tt_um_hrv (
             endcase
         end
     end
-
-endmodule
-
-
-
-  assign uio_out = 0;
-  assign uio_oe  = 0;
-
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
 
 endmodule
