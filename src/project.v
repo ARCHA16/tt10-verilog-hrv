@@ -49,7 +49,6 @@ module tt_um_rmssd (
     );
 
     assign uo_out = {done, rmssd_out[6:0]}; // 7 bits of result + done
-
 endmodule
   // All output pins must be assigned. If not used, assign to 0.
  // assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
@@ -116,11 +115,11 @@ module rmssd_serial #(
             case (state)
                 IDLE: begin
                     if (bit_valid) begin
-                        rr_shift_reg <= {rr_shift_reg[6:0], bit_in};
+                        rr_shift_reg <= {rr_shift_reg[7:0], bit_in};
                         bit_counter <= bit_counter + 1;
                     end
                     if (bit_counter == 7 && rr_valid) begin
-                        rr_buffer[rr_counter] <= {rr_shift_reg[6:0], bit_in};
+                        rr_buffer[rr_counter] <= {rr_shift_reg[7:0], bit_in};
                         rr_counter <= rr_counter + 1;
                         bit_counter <= 0;
                         if (rr_counter == RR_COUNT - 1)
