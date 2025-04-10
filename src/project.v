@@ -34,16 +34,35 @@ module tt_um_hrv (
 
     // State machine
     reg [1:0] state;
-    localparam IDLE = 2'b00, READ = 2'b01, CALC = 2'b10, DONE = 2'b11;
+    localparam IDLE = 2'b00,
+               READ = 2'b01,
+               CALC = 2'b10,
+               DONE = 2'b11;
+
+    // Square root approximation function (declared before use)
+    function [7:0] sqrt_approx;
+        input [15:0] x;
+        integer i;
+        reg [7:0] result;
+        begin
+            result = 0;
+            for (i = 15; i >= 0; i = i - 2) begin
+                result = result << 1;
+                if ((result + 1) * (result + 1) <= (x >> i))
+                    result = result + 1;
+            end
+            sqrt_approx = result;
+        end
+    endfunction
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            rr_prev <= 0;
-            sum_sq_diff <= 0;
-            count <= 0;
+            rr_prev <= 8'b0;
+            sum_sq_diff <= 16'b0;
+            count <= 4'b0;
             state <= IDLE;
-            rmssd_out <= 0;
-            done <= 0;
+            rmssd_out <= 8'b0;
+            done <= 1'b0;
         end 
         else begin
             case (state)
@@ -57,7 +76,8 @@ module tt_um_hrv (
                     if (count == 0) begin
                         rr_prev <= rr_in;
                         count <= count + 1;
-                    end else begin
+                    end 
+                    else begin
                         // Compute difference squared
                         sum_sq_diff <= sum_sq_diff + ((rr_in - rr_prev) * (rr_in - rr_prev));
                         rr_prev <= rr_in;
@@ -73,28 +93,14 @@ module tt_um_hrv (
                 end
 
                 DONE: begin
-                    done <= 1;
+                    done <= 1'b1;
                 end
             endcase
         end
     end
 
-    // Shift-based Square Root Approximation
-    function [7:0] sqrt_approx(input [15:0] x);
-        integer i;
-        reg [7:0] result;
-        begin
-            result = 0;
-            for (i = 15; i >= 0; i = i - 2) begin
-                result = result << 1;
-                if ((result + 1) * (result + 1) <= (x >> i))
-                    result = result + 1;
-            end
-            sqrt_approx = result;
-        end
-    endfunction
-
 endmodule
+
 
 
   assign uio_out = 0;
